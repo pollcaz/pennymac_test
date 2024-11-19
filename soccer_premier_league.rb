@@ -1,14 +1,16 @@
-class SoccerPremierLeague
-    def initialize
-        @file = File.open('./soccer.dat', 'r')
+require_relative 'base_class'
+class SoccerPremierLeague < BaseClass
+    FILE_START_LINE = 3
+    def initialize(file_path = './soccer.dat')
+        super(file_path)
     end
 
-    def find_smallest_difference
+    def find_smallest
         min_difference = Float::INFINITY
         team_with_min_difference = ''
-        raise 'File not found' unless @file
 
-        @file.each_line.with_index(3) do |line, index|
+        IO.foreach(@file_path).with_index do |line, index|
+            next if index < FILE_START_LINE
             next if line.start_with?('</pre>')
 
             line_values = line.split
@@ -20,8 +22,15 @@ class SoccerPremierLeague
             team_with_min_difference = line_values[1]
         end
 
-        small_difference = { team_name: team_with_min_difference, small_difference: min_difference }
-        puts small_difference
+        if team_with_min_difference
+            { team_name: team_with_min_difference, small_difference: min_difference }
+        else
+            raise "There aren't any valid difference values in the file: #{@file_path}"
+        end
+    rescue => e
+        puts "Error: #{e.message}"
     end
-
 end
+
+spl_class = SoccerPremierLeague.new
+puts spl_class.find_smallest
